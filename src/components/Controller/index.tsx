@@ -12,6 +12,7 @@ import { AppContext } from 'Provider';
 import models from '@consts/model_list.json';
 import { CascaderData } from "@douyinfe/semi-ui/lib/es/cascader";
 import Chatgpt from './Chatgpt';
+import Live from './Live';
 
 export const Controller = () => {
     const [visible, setVisible] = useState<boolean>(false);
@@ -35,7 +36,7 @@ export const Controller = () => {
     return (
         <>
             <IconSetting className={Style.setting} onClick={() => setVisible(true)} />
-            <SideSheet size="medium" visible={visible} title="设置" onCancel={() => setVisible(false)}>
+            <SideSheet size="medium" visible={visible} title="设置" mask={false} onCancel={() => setVisible(false)}>
                 <Collapse>
                     <Collapse.Panel header="背景" itemKey='background'>
                         <Background />
@@ -57,6 +58,9 @@ export const Controller = () => {
                     </Collapse.Panel>
                     <Collapse.Panel header="Chatgpt" itemKey='chatgpt'>
                         <Chatgpt />
+                    </Collapse.Panel>
+                    <Collapse.Panel header="直播" itemKey='live'>
+                        <Live />
                     </Collapse.Panel>
                 </Collapse>
             </SideSheet>

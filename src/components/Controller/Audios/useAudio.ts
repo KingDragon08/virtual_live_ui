@@ -9,6 +9,7 @@ export const useAudio = () => {
         style, setStyle,
         speed, setSpeed,
         pitch, setPitch,
+        preConfigedVoice, setPreConfigedVoice,
     } = useContext(AppContext);
     const [text, setText] = useState<string>('');
     const [src, setSrc] = useState<string>('');
@@ -47,6 +48,7 @@ export const useAudio = () => {
         style, setStyle,
         speed, setSpeed,
         pitch, setPitch,
+        preConfigedVoice, setPreConfigedVoice,
         text, setText,
         src, setSrc,
         loading, setLoading,

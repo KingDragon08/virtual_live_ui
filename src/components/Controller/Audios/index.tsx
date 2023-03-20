@@ -15,6 +15,7 @@ export const Audios = () => {
         speed, setSpeed,
         pitch, setPitch,
         text, setText,
+        preConfigedVoice, setPreConfigedVoice,
         src,
         loading,
         loop, setLoop,
@@ -26,7 +27,8 @@ export const Audios = () => {
 
     return (
         <>
-            <Configed onChange={([voice, style, speed, pitch]) => {
+            <Configed value={preConfigedVoice} onChange={([voice, style, speed, pitch, value]) => {
+                setPreConfigedVoice(value);
                 setVoice(voice);
                 setStyle(style);
                 setSpeed(parseFloat(speed));

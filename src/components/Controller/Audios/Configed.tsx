@@ -1,18 +1,20 @@
 import { Select } from "@douyinfe/semi-ui";
 
 type Props  = {
+    value: string;
     onChange: (v: string[]) => void;
 }
-export const Configed = ({ onChange: _onChange }: Props) => {
+export const Configed = ({ onChange: _onChange, value }: Props) => {
     const onChange = (v: string) => {
         const [voice, style, speed, pitch] = v.split('_');
-        _onChange([voice, style, speed, pitch]);
+        _onChange([voice, style, speed, pitch, v]);
     }
 
     return (
         <Select
             placeholder="预配置"
             style={{ width: '100%' }}
+            value={value}
             onChange={(v) => onChange(v as string)}
         >
             <Select.Option value="zh-CN-XiaoxiaoNeural_cheerful_1.1_0">晓晓_cheerful_1.1_0</Select.Option>

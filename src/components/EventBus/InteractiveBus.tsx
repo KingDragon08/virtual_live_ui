@@ -11,6 +11,7 @@ import { BASE_URL } from '@utils/axios';
 import { AppContext } from "Provider";
 import mint from "@utils/mint-filter";
 import { chatgpt, voiceGen } from "@services/index"
+import { ReplyCondition } from "@hooks/useApp";
 // import TestMsgs from "@components/Monitor/douyin_test_msgs";
 
 // 礼物 user id => Message 的 map
@@ -38,6 +39,7 @@ export const InteractiveBus = () => {
     const { voice, style, speed, pitch, randomMotion, defaultAudioSrc } = useContext(AppContext);
     // 语音的地址
     const [src, setSrc] = useState<string>('');
+    const { replyCondition } = useContext(AppContext);
 
     const pushMsg = (msg: Message) => {
         const tmp = cloneDeep(msgsRef.current);
@@ -59,7 +61,7 @@ export const InteractiveBus = () => {
 
     const onMessage = (msg: Message) => {
         // 送礼消息
-        if (msg.common?.method === Method.WebcastGiftMessage && msg.user?.id) {
+        if (msg.common?.method === Method.WebcastGiftMessage && msg.user?.id && replyCondition !== ReplyCondition.None) {
             if (gifts[msg.user.id]) {
                 gifts[msg.user.id].coins += 1;
             } else {
@@ -71,7 +73,7 @@ export const InteractiveBus = () => {
         if (
             msg.common?.method === Method.WebcastChatMessage &&
             msg.user?.id &&
-            gifts[msg.user.id] &&
+            (gifts[msg.user.id] || replyCondition === ReplyCondition.None) &&
             msg.content &&
             // 敏感词检测
             mint.verify(msg.content)
