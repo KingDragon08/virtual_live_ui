@@ -1,0 +1,15 @@
+.announce {
+    position: absolute;
+    right: 20px; top: 140px;
+    color: #D87093;
+    cursor: pointer;
+}
+
+.container {
+    width: 100%; height: 100%;
+    box-sizing: border-box;
+    padding: 11px;
+    display: flex;
+    flex-direction: column;
+    font-size: 18px;
+}
