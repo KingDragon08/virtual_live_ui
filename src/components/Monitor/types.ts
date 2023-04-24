@@ -1,3 +1,40 @@
+export type Response = {
+    messagesList: MessageOrigin[];
+    cursor: string;
+    fetchInterval: number;
+    uint64: number;
+    internalExt: string;
+    fetchType: number;
+    routeParams: Record<string, string>;
+    heartbeatDuration: number;
+    needAck: boolean;
+    pushServer: string;
+    liveCursor: string;
+    historyNoMore: boolean;
+}
+
+export type PushFrame = {
+    seqId: number;
+    logId: number;
+    service: number;
+    method: number;
+    headersList: HeadersList[];
+    payloadEncoding: string;
+    payloadType: string;
+    payload: Uint8Array;
+}
+
+export type HeadersList = {
+    key: string;
+    value: string;
+}
+
+export type MessageOrigin = {
+    method: Method;
+    msgId: string;
+    payload: Uint8Array;
+};
+
 export type Message = {
     code?: number;
     msg?: string;

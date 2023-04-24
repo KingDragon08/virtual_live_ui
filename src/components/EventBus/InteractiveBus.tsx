@@ -1,4 +1,4 @@
-import { Message, Method } from "@components/Monitor/types";
+import { Message, MessageOrigin, Method } from "@components/Monitor/types";
 import { bus, EVENTS } from "@hooks/useEventBus";
 import { useEffect, useState, useRef, useContext } from "react";
 import { cloneDeep } from "lodash";
@@ -12,6 +12,7 @@ import { AppContext } from "Provider";
 import mint from "@utils/mint-filter";
 import { chatgpt, voiceGen } from "@services/index"
 import { ReplyCondition } from "@hooks/useApp";
+import useOriginMsg2Msg from "@components/Monitor/msgs/useOriginMsg2Msg";
 // import TestMsgs from "@components/Monitor/douyin_test_msgs";
 
 // 礼物 user id => Message 的 map
@@ -26,7 +27,8 @@ const IDLE_TIMES = 5;
 let CURRENT_IDLE_TIMES = 0;
 
 export const InteractiveBus = () => {
-    const [msgs, setMsgs] = useState<Message[]>([]);
+    const { transform } = useOriginMsg2Msg();
+    const [msgs, setMsgs] = useState<MessageOrigin[]>([]);
     // const [msgs, setMsgs] = useState<Message[]>(TestMsgs);
     const msgsRef = useRef(msgs);
     const [currentMsg, _setCurrentMsg] = useState<Nullable<Message>>(null);
@@ -41,14 +43,14 @@ export const InteractiveBus = () => {
     const [src, setSrc] = useState<string>('');
     const { replyCondition } = useContext(AppContext);
 
-    const pushMsg = (msg: Message) => {
+    const pushMsg = (msg: MessageOrigin) => {
         const tmp = cloneDeep(msgsRef.current);
         tmp.push(msg);
         msgsRef.current = tmp;
         setMsgs(tmp);
     };
 
-    const getMsg = (): Message | undefined => {
+    const getMsg = (): MessageOrigin | undefined => {
         const tmp = cloneDeep(msgsRef.current);
         if (tmp.length) {
             const msg = tmp.shift();
@@ -59,7 +61,8 @@ export const InteractiveBus = () => {
         return undefined;
     }
 
-    const onMessage = (msg: Message) => {
+    const onMessage = (msgOrigin: MessageOrigin) => {
+        const msg = transform(msgOrigin);
         // 送礼消息
         if (msg.common?.method === Method.WebcastGiftMessage && msg.user?.id && replyCondition !== ReplyCondition.None) {
             if (gifts[msg.user.id]) {
@@ -67,7 +70,7 @@ export const InteractiveBus = () => {
             } else {
                 gifts[msg.user.id] = { ...msg, coins: 1 };
             }
-            pushMsg(msg);
+            pushMsg(msgOrigin);
         }
         // 文字消息 && 有送礼物
         if (
@@ -78,7 +81,7 @@ export const InteractiveBus = () => {
             // 敏感词检测
             mint.verify(msg.content)
         ) {
-            pushMsg(msg);
+            pushMsg(msgOrigin);
         }
     };
 
@@ -90,8 +93,8 @@ export const InteractiveBus = () => {
         setIsLoading(false);
         setCurrentAnswer.current('');
         setCurrentMsg.current(null);
-        const msg = getMsg();
-        if (msg === undefined) {
+        const msgOrigin = getMsg();
+        if (msgOrigin === undefined) {
             // 随机动作
             randomMotion();
             // 空闲次数 +1
@@ -117,8 +120,9 @@ export const InteractiveBus = () => {
             LOOP_ID = setTimeout(Loop, LOOP_INTERVAL);
             return;
         }
+        const msg = transform(msgOrigin);
         // 礼物消息，显示弹幕，播放感谢xxx送来的礼物，你可以向我提一个问题噢
-        if (msg?.common?.method === Method.WebcastGiftMessage) {
+        if (msgOrigin.method === Method.WebcastGiftMessage) {
             // 构造文案
             const text = `感谢${msg.user?.nickName}送来的${msg.gift?.name}, 你可以向我提一个问题哦`;
             // 打接口
@@ -139,7 +143,7 @@ export const InteractiveBus = () => {
             return;
         }
         // 提问消息，清除提问权限，显示弹幕，播放语音
-        if (msg?.common?.method === Method.WebcastChatMessage) {
+        if (msgOrigin.method === Method.WebcastChatMessage) {
             // 更新提问权限
             if (gifts[msg.user!.id]) {
                 gifts[msg.user!.id].coins -= 1;
@@ -198,7 +202,7 @@ export const InteractiveBus = () => {
             <DraggablePanel title="待回答的问题" width={300} height={400} style={{ display: visible ? 'flex' : 'none', left: '310px' }}>
                 <div className={Style.container}>
                     <div className={Style.msgs}>
-                        <Msgs msgs={msgs.filter((item) => item.common?.method === Method.WebcastChatMessage)} />
+                        <Msgs msgs={msgs.filter((item) => item.method === Method.WebcastChatMessage)} />
                     </div>
                 </div>
             </DraggablePanel>
